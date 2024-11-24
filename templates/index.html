@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clustering Produksi Telur</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .map-container, .forecast-container {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .map-container iframe, .forecast-container img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -18,6 +33,14 @@
                 </option>
                 {% endfor %}
             </select>
+            <label for="province">Pilih Provinsi:</label>
+            <select name="province" id="province">
+                {% for province in provinces %}
+                <option value="{{ province }}" {% if province == selected_province %}selected{% endif %}>
+                    {{ province }}
+                </option>
+                {% endfor %}
+            </select>
             <button type="submit">Tampilkan</button>
         </form>
 
@@ -27,6 +50,18 @@
             {{ map_html|safe }}
         </div>
         {% endif %}
+
+        <!-- Display forecast graph if available -->
+        {% if forecast_graph %}
+        <div class="forecast-container">
+            <br><br>
+            <h2>Grafik Prediksi Harga Telur (2023-2024)</h2>
+            <img src="data:image/png;base64,{{ forecast_graph }}" alt="Grafik Prediksi Harga Telur">
+        </div>
+        {% endif %}
+
+        <!-- Container for province forecast graph -->
+        <div id="province-forecast-container" class="forecast-container"></div>
     </div>
 </body>
 </html>
