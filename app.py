@@ -25,7 +25,7 @@ coordinates_dict = {item["name"]: (item["latitude"], item["longitude"]) for item
 cluster_colors = {"Rendah": "lightgreen", "Sedang": "yellow", "Tinggi": "red"}
 
 # Load forecast data
-forecast_data_path = "data/ABDFORECAST.csv"
+forecast_data_path = "data/Formatted_Forecasting_Data.csv"
 forecast_data = pd.read_csv(forecast_data_path)
 
 # Restructure data for forecasting
@@ -36,9 +36,9 @@ forecast_data_long = forecast_data.melt(
 )
 
 # Clean up the data
-forecast_data_long["Date"] = forecast_data_long["Date"].str.strip()  # Remove extra spaces
+forecast_data_long["Date"] = forecast_data_long["Date"].astype(str).str.strip()  # Ensure 'Date' column is of type string before using .str accessor
 forecast_data_long["Price"] = (
-    forecast_data_long["Price"].str.replace(",", "").replace("-", None).astype(float)
+    forecast_data_long["Price"].astype(str).str.replace(",", "").replace("-", None).astype(float)  # Ensure 'Price' column is of type string before using .str accessor
 )  # Convert price to numeric
 forecast_data_long["Date"] = pd.to_datetime(forecast_data_long["Date"], format="%d/ %m/ %Y", errors="coerce")  # Convert date to datetime
 
@@ -47,15 +47,15 @@ forecast_data_long = forecast_data_long.dropna(subset=["Date", "Price"])
 forecast_data_long["Year"] = forecast_data_long["Date"].dt.year
 forecast_data_long["Month"] = forecast_data_long["Date"].dt.month
 
-# Filter data for 2023 and 2024
-forecast_data_filtered = forecast_data_long[forecast_data_long["Year"].isin([2023, 2024])]
+# Filter data untuk tahun 2023, 2024, dan 2025
+forecast_data_filtered = forecast_data_long[forecast_data_long["Year"].isin([2023, 2024, 2025])]
 
 def generate_forecast_graph(data):
     """Generate the forecast graph and return it as a base64 image."""
     # Aggregate data by month and year (average price per month)
     monthly_avg_prices = data.groupby(["Year", "Month"])["Price"].mean().reset_index()
     prov = data["Komoditas (Rp)"].iloc[0]
-    # Create a line plot for 2023 and 2024
+    # Create a line plot for 2023, 2024, and 2025
     plt.figure(figsize=(10, 5))
     sns.lineplot(
         data=monthly_avg_prices,
@@ -68,7 +68,7 @@ def generate_forecast_graph(data):
     )
 
     # Customize the plot
-    plt.title(f"Harga Telur {prov} (2023 vs 2024)", fontsize=16)
+    plt.title(f"Harga Telur {prov} (2023-2025)", fontsize=16)
     plt.xlabel("Bulan", fontsize=12)
     plt.ylabel("Harga (Rp)", fontsize=12)
     plt.xticks(ticks=range(1, 13), labels=["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"])

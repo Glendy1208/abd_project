@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clustering Produksi Telur</title>
+    <title>Analisis Big Data untuk Optimalisasi Produksi Telur di Indonesia</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
         .container {
@@ -23,7 +23,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Clustering Produksi Telur</h1>
+        <h1>Analisis Big Data untuk Optimalisasi Produksi Telur di Indonesia</h1>
         <form method="get" action="/">
             <label for="year">Pilih Tahun:</label>
             <select name="year" id="year">
@@ -33,6 +33,7 @@
                 </option>
                 {% endfor %}
             </select>
+
             <label for="province">Pilih Provinsi:</label>
             <select name="province" id="province">
                 {% for province in provinces %}
@@ -43,18 +44,17 @@
             </select>
             <button type="submit">Tampilkan</button>
         </form>
-
+        <br>
         <!-- Display the map below the form -->
         {% if map_html %}
         <div class="map-container">
             {{ map_html|safe }}
         </div>
         {% endif %}
-
+        <br>
         <!-- Display forecast graph if available -->
         {% if forecast_graph %}
         <div class="forecast-container">
-            <br><br>
             <h2>Grafik Prediksi Harga Telur (2023-2024)</h2>
             <img src="data:image/png;base64,{{ forecast_graph }}" alt="Grafik Prediksi Harga Telur">
         </div>
