@@ -22,7 +22,10 @@
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: 0; /* Tetapkan z-index lebih rendah dari elemen judul */
+            pointer-events: auto; /* Pastikan peta dapat menerima interaksi pengguna */
         }
+
     
         /* Filter Container */
         .filter-container {
@@ -36,7 +39,6 @@
             z-index: 1000; /* High z-index */
         }
 
-    
         /* Title Container */
         .title-container {
             position: fixed; /* Fixed position */
@@ -46,6 +48,7 @@
             z-index: 1000; /* High z-index */
             color: #ffffff;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
         }
     
         /* Graph Container */
