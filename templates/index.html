@@ -3,13 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analisis Big Data untuk Optimalisasi Produksi Telur di Indonesia</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Analisis Big Data untuk Optimalisasi Produksi Telur</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Tombol Kamera di Pojok Kanan Bawah */
-        .camera-btn {
-            position: fixed;
+        /* Fullscreen Map */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    
+        .map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    
+        /* Filter Container */
+        .filter-container {
+            position: fixed; /* Fixed position */
+            top: 100px; /* Pindahkan ke bawah untuk menghindari tombol zoom peta */
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000; /* High z-index */
+        }
+
+    
+        /* Title Container */
+        .title-container {
+            position: fixed; /* Fixed position */
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            z-index: 1000; /* High z-index */
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+        }
+    
+        /* Graph Container */
+        .graph-container {
+            position: fixed; /* Fixed position */
             bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000; /* High z-index */
+            max-width: 400px;
+            max-height: 300px;
+        }
+    
+        /* Camera Button */
+        .camera-btn {
+            position: fixed; /* Fixed position */
+            top: 20px;
             right: 20px;
             background-color: #007bff;
             color: white;
@@ -22,126 +78,99 @@
             justify-content: center;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            z-index: 1000;
+            z-index: 1001; /* Higher z-index than other elements */
         }
-
-        .camera-btn:hover {
-            background-color: #0056b3;
-        }
-
-        /* Pop-Up Halaman Kamera */
+    
+        /* Camera Popup */
         .camera-popup {
             display: none;
-            position: fixed;
+            position: fixed; /* Fixed position for the pop-up */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.6);
-            z-index: 999;
+            z-index: 2000; /* Higher z-index than all elements */
             justify-content: center;
             align-items: center;
         }
-
+    
         .camera-popup .popup-content {
             background: white;
             width: 65%;
             height: 65%;
             border-radius: 10px;
             overflow: hidden;
-            position: relative;
             display: flex;
             flex-direction: column;
-        }
-
-        .camera-popup .popup-header {
-            background-color: #007bff;
-            color: white;
-            padding: 10px;
-            font-size: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .camera-popup .popup-header button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .camera-popup .popup-body {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f4f4f9;
-        }
-
-        .camera-popup img {
-            max-width: 100%;
-            max-height: 100%;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Analisis Big Data untuk Optimalisasi Produksi Telur di Indonesia</h1>
-        <!-- Form Pilihan -->
-        <form method="get" action="/">
-            <label for="year">Pilih Tahun:</label>
-            <select name="year" id="year">
-                {% for year in years %}
-                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
-                    {{ year }}
-                </option>
-                {% endfor %}
-            </select>
-
-            <label for="province">Pilih Provinsi:</label>
-            <select name="province" id="province">
-                {% for province in provinces %}
-                <option value="{{ province }}" {% if province == selected_province %}selected{% endif %}>
-                    {{ province }}
-                </option>
-                {% endfor %}
-            </select>
-            <button type="submit">Tampilkan</button>
-        </form>
-
-        <!-- Map dan Forecast -->
-        {% if map_html %}
-        <div class="map-container">
-            {{ map_html|safe }}
-        </div>
-        {% endif %}
-        {% if forecast_graph %}
-        <div class="forecast-container">
-            <h2>Grafik Prediksi Harga Telur (2023-2024)</h2>
-            <img src="data:image/png;base64,{{ forecast_graph }}" alt="Grafik Prediksi Harga Telur">
-        </div>
-        {% endif %}
+    <!-- Map Container -->
+    <div class="map-container">
+        {{ map_html|safe }}
     </div>
 
-    <!-- Tombol Kamera -->
-    <button class="camera-btn" onclick="toggleCameraPopup()">
-        📷
-    </button>
+    <!-- Title -->
+    <div class="title-container">
+        <h1>Analisis Big Data untuk Optimalisasi Produksi Telur</h1>
+    </div>
 
-    <!-- Pop-Up Kamera -->
+    <!-- Filter Form -->
+    <div class="filter-container">
+        <form method="get" action="/">
+            <div class="mb-3">
+                <label for="year" class="form-label">Pilih Tahun:</label>
+                <select class="form-select" name="year" id="year">
+                    {% for year in years %}
+                    <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                        {{ year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="province" class="form-label">Pilih Provinsi:</label>
+                <select class="form-select" name="province" id="province">
+                    {% for province in provinces %}
+                    <option value="{{ province }}" {% if province == selected_province %}selected{% endif %}>
+                        {{ province }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Tampilkan</button>
+        </form>
+    </div>
+
+    <!-- Graph Container -->
+    {% if forecast_graph %}
+    <div class="graph-container">
+        <h5 class="text-center">Grafik Prediksi Harga Telur</h5>
+        <img src="data:image/png;base64,{{ forecast_graph }}" alt="Grafik Prediksi Harga Telur" class="img-fluid">
+    </div>
+    {% endif %}
+
+    <!-- Camera Button -->
+    <button class="camera-btn" onclick="toggleCameraPopup()">📷</button>
+
+    <!-- Camera Popup -->
     <div class="camera-popup" id="cameraPopup">
         <div class="popup-content">
-            <div class="popup-header">
+            <div class="d-flex justify-content-between align-items-center p-3 bg-primary text-white">
                 <span>Real-Time Egg Classification</span>
-                <button onclick="toggleCameraPopup()">×</button>
+                <button onclick="toggleCameraPopup()" class="btn-close btn-close-white"></button>
             </div>
-            <div class="popup-body">
+            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
                 <img id="cameraFeed" src="" alt="Camera Feed">
             </div>
         </div>
     </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         function toggleCameraPopup() {
