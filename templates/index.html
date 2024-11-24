@@ -138,7 +138,7 @@
                 <button onclick="toggleCameraPopup()">×</button>
             </div>
             <div class="popup-body">
-                <img src="/video_feed" alt="Camera Feed">
+                <img id="cameraFeed" src="" alt="Camera Feed">
             </div>
         </div>
     </div>
@@ -146,7 +146,24 @@
     <script>
         function toggleCameraPopup() {
             const popup = document.getElementById('cameraPopup');
-            popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
+            const cameraFeed = document.getElementById('cameraFeed');
+            if (popup.style.display === 'flex') {
+                fetch('/stop_camera')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data.status);
+                        cameraFeed.src = "";
+                        popup.style.display = 'none';
+                    });
+            } else {
+                fetch('/start_camera')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data.status);
+                        cameraFeed.src = "/video_feed";
+                        popup.style.display = 'flex';
+                    });
+            }
         }
     </script>
 </body>

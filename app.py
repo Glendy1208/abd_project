@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, Response
+from flask import Flask, render_template, request, url_for, Response, jsonify
 import pandas as pd
 import folium
 import json
@@ -10,11 +10,15 @@ import tensorflow as tf
 import numpy as np
 import cv2
 from tensorflow.keras.models import load_model
+import threading
 
 app = Flask(__name__)
 
 # Muat model klasifikasi gambar
 model = load_model('models/egg_classification_model.h5')
+
+camera_active = False
+camera_lock = threading.Lock()
 
 def preprocess_image(image):
     image = cv2.resize(image, (224, 224))
@@ -28,9 +32,26 @@ def classify_frame(frame):
     result = 'Damaged' if prediction[0][0] > 0.5 else 'Not Damaged'
     return result
 
+@app.route('/start_camera')
+def start_camera():
+    global camera_active
+    with camera_lock:
+        camera_active = True
+    return jsonify({"status": "Camera started"})
+
+@app.route('/stop_camera')
+def stop_camera():
+    global camera_active
+    with camera_lock:
+        camera_active = False
+    return jsonify({"status": "Camera stopped"})
+
 def generate_frames():
     cap = cv2.VideoCapture(0)
     while True:
+        with camera_lock:
+            if not camera_active:
+                break
         success, frame = cap.read()
         if not success:
             break
