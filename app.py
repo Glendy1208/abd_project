@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, Response
 import pandas as pd
 import folium
 import json
@@ -6,8 +6,51 @@ import matplotlib.pyplot as plt
 import io
 import base64
 import seaborn as sns
+import tensorflow as tf
+import numpy as np
+import cv2
+from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
+
+# Muat model klasifikasi gambar
+model = load_model('models/egg_classification_model.h5')
+
+def preprocess_image(image):
+    image = cv2.resize(image, (224, 224))
+    image = image / 255.0
+    image = np.expand_dims(image, axis=0)
+    return image
+
+def classify_frame(frame):
+    preprocessed_image = preprocess_image(frame)
+    prediction = model.predict(preprocessed_image)
+    result = 'Damaged' if prediction[0][0] > 0.5 else 'Not Damaged'
+    return result
+
+def generate_frames():
+    cap = cv2.VideoCapture(0)
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break
+        else:
+            result = classify_frame(frame)
+            height, width, _ = frame.shape
+            start_point = (int(width * 0.3), int(height * 0.3))
+            end_point = (int(width * 0.7), int(height * 0.7))
+            color = (0, 255, 0) if result == 'Not Damaged' else (0, 0, 255)
+            cv2.rectangle(frame, start_point, end_point, color, 2)
+            cv2.putText(frame, result, (start_point[0], start_point[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    cap.release()
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Load dataset
 data_path = "data/egg_clustering_data_english.csv"
